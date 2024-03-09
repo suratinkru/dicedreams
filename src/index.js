@@ -11,6 +11,8 @@ const routerAuth = require("./routers/auth");
 const routerPostActivity = require("./routers/postActivity");
 const routerPostGame = require("./routers/postGame");
 const routerComment = require("./routers/comment");
+const routParticipate = require("./routers/participate");
+const routerStore = require("./routers/store");
 
 db.sequelize.sync();
 // db.sequelize.sync({ force: true }).then(() => {
@@ -48,6 +50,8 @@ app.use('/api/users', routerUser);
 app.use('/api/postActivity', routerPostActivity);
 app.use('/api/postGame', routerPostGame);
 app.use('/api/comment', routerComment);
+app.use('/api/participate', routParticipate);
+app.use('/api/store', routerStore);
 
 
 

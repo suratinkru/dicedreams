@@ -38,8 +38,9 @@ exports.create = async (req, res, next) => {
 
     // Save game in the database async
     const data = await PostGames.create(game);
-    res.status(201).json({message: "Game was created successfully.", data: data});
-    
+    res
+      .status(201)
+      .json({ message: "Game was created successfully.", data: data });
   } catch (error) {
     next(error);
   }
@@ -54,11 +55,13 @@ exports.findAll = (req, res) => {
 
   PostGames.findAll()
     .then((data) => {
-        data.map((post_games) => {
-            if (post_games.games_image) {
-            post_games.games_image = `${req.protocol}://${req.get("host")}/images/${post_games.games_image}`;
-            }
-        });
+      data.map((post_games) => {
+        if (post_games.games_image) {
+          post_games.games_image = `${req.protocol}://${req.get(
+            "host"
+          )}/images/${post_games.games_image}`;
+        }
+      });
       res.send(data);
     })
     .catch((err) => {
@@ -74,9 +77,11 @@ exports.findOne = (req, res) => {
 
   PostGames.findByPk(id)
     .then((data) => {
-        if (data.games_image) {
-            data.games_image = `${req.protocol}://${req.get("host")}/images/${data.games_image}`;
-        }
+      if (data.games_image) {
+        data.games_image = `${req.protocol}://${req.get("host")}/images/${
+          data.games_image
+        }`;
+      }
       res.send(data);
     })
     .catch((err) => {
@@ -91,17 +96,18 @@ exports.update = async (req, res, next) => {
   const id = req.params.id;
 
   //   check image is updated
-  if (req.body.games_image.search("data:image") != -1) {
-    const postGames = await PostGames.findByPk(id);
-    const uploadPath = path.resolve("./") + "/src/public/images/";
+  if (req.body.games_image) {
+    if (req.body.games_image.search("data:image") != -1) {
+      const postGames = await PostGames.findByPk(id);
+      const uploadPath = path.resolve("./") + "/src/public/images/";
 
-    fs.unlink(uploadPath + postGames.games_image, function (err) {
-      console.log("File deleted!");
-    });
+      fs.unlink(uploadPath + postGames.games_image, function (err) {
+        console.log("File deleted!");
+      });
 
-    req.body.games_image = await saveImageToDisk(req.body.games_image);
+      req.body.games_image = await saveImageToDisk(req.body.games_image);
+    }
   }
-
   req.body.date_meet = moment(req.body.date_meet, "MM-DD-YYYY");
 
   PostGames.update(req.body, {
@@ -167,39 +173,38 @@ exports.deleteAll = (req, res) => {
 };
 
 async function saveImageToDisk(baseImage) {
-    const projectPath = path.resolve("./");
-  
-    const uploadPath = `${projectPath}/src/public/images/`;
-  
-    const ext = baseImage.substring(
-      baseImage.indexOf("/") + 1,
-      baseImage.indexOf(";base64")
-    );
-  
-    let filename = "";
-    if (ext === "svg+xml") {
-      filename = `${uuidv4()}.svg`;
-    } else {
-      filename = `${uuidv4()}.${ext}`;
-    }
-  
-    let image = decodeBase64Image(baseImage);
-  
-    await writeFileAsync(uploadPath + filename, image.data, "base64");
-  
-    return filename;
+  const projectPath = path.resolve("./");
+
+  const uploadPath = `${projectPath}/src/public/images/`;
+
+  const ext = baseImage.substring(
+    baseImage.indexOf("/") + 1,
+    baseImage.indexOf(";base64")
+  );
+
+  let filename = "";
+  if (ext === "svg+xml") {
+    filename = `${uuidv4()}.svg`;
+  } else {
+    filename = `${uuidv4()}.${ext}`;
   }
-  
-  function decodeBase64Image(base64Str) {
-    var matches = base64Str.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
-    var image = {};
-    if (!matches || matches.length !== 3) {
-      throw new Error("Invalid base64 string");
-    }
-  
-    image.type = matches[1];
-    image.data = matches[2];
-  
-    return image;
+
+  let image = decodeBase64Image(baseImage);
+
+  await writeFileAsync(uploadPath + filename, image.data, "base64");
+
+  return filename;
+}
+
+function decodeBase64Image(base64Str) {
+  var matches = base64Str.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+  var image = {};
+  if (!matches || matches.length !== 3) {
+    throw new Error("Invalid base64 string");
   }
-  
+
+  image.type = matches[1];
+  image.data = matches[2];
+
+  return image;
+}

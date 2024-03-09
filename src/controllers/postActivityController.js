@@ -69,19 +69,23 @@ exports.update = async (req, res, next) => {
   try {
     const post_activity_id = req.params.id;
 
-    if (req.body.post_activity_image.search("data:image") != -1) {
-      const postactivity = await PostActivity.findByPk(post_activity_id);
-      const uploadPath = path.resolve("./") + "/src/public/images/";
+    if (req.body.post_activity_image) {
+      if (req.body.post_activity_image.search("data:image") != -1) {
+        const postactivity = await PostActivity.findByPk(post_activity_id);
+        const uploadPath = path.resolve("./") + "/src/public/images/";
 
-      fs.unlink(uploadPath + postactivity.post_activity_image, function (err) {
-        console.log("File deleted!");
-      });
+        fs.unlink(
+          uploadPath + postactivity.post_activity_image,
+          function (err) {
+            console.log("File deleted!");
+          }
+        );
 
-      req.body.post_activity_image = await saveImageToDisk(
-        req.body.post_activity_image
-      );
+        req.body.post_activity_image = await saveImageToDisk(
+          req.body.post_activity_image
+        );
+      }
     }
-
     (req.body.date_activity = moment(req.body.date_activity, "MM-DD-YYYY")),
       await PostActivity.update(req.body, {
         where: {

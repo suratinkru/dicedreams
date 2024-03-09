@@ -107,17 +107,18 @@ exports.update = async (req, res, next) => {
   try {
     const users_id = req.params.id;
 
-    if (req.body.user_image.search("data:image") != -1) {
-      const user = await User.findByPk(users_id);
-      const uploadPath = path.resolve("./") + "/src/public/images/";
+    if (req.body.user_image) {
+      if (req.body.user_image.search("data:image") != -1) {
+        const user = await User.findByPk(users_id);
+        const uploadPath = path.resolve("./") + "/src/public/images/";
 
-      fs.unlink(uploadPath + user.user_image, function (err) {
-        console.log("File deleted!");
-      });
+        fs.unlink(uploadPath + user.user_image, function (err) {
+          console.log("File deleted!");
+        });
 
-      req.body.user_image = await saveImageToDisk(req.body.user_image);
+        req.body.user_image = await saveImageToDisk(req.body.user_image);
+      }
     }
-
     req.body.birthday = moment(req.body.birthday, "MM-DD-YYYY");
 
     User.update(req.body, {
