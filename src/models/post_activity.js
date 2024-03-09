@@ -38,14 +38,14 @@ module.exports = (sequelize, Sequelize) => {
         type: DataTypes.STRING(255), // ใช้ STRING สำหรับการเก็บ URL หรือเส้นทางของรูปภาพ
         allowNull: true,
       },
-      // store_id: {
-      //   type: DataTypes.UUID,
-      //   references: {
-      //     model: 'store', // ชื่อตารางของ store
-      //     key: 'store_id', // คีย์ที่ถูกอ้างอิง
-      //   },
-      //   allowNull: false
-      // }
+      store_id: {
+        type: DataTypes.UUID,
+        references: {
+          model: 'store', // ชื่อตารางของ store
+          key: 'store_id', // คีย์ที่ถูกอ้างอิง
+        },
+        allowNull: false
+      }
     },
     {
       // ตัวเลือกเพิ่มเติม

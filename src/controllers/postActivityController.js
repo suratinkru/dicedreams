@@ -21,6 +21,7 @@ exports.create = async (req, res, next) => {
       date_activity,
       time_activity,
       post_activity_image,
+      store_id
     } = req.body;
 
     const data = {
@@ -28,8 +29,9 @@ exports.create = async (req, res, next) => {
       status_post: status_post,
       creation_date: creation_date,
       detail_post: detail_post,
-      date_activity: moment(req.body.date_activity, "MM-DD-YYYY"),
+      date_activity: moment(date_activity, "MM-DD-YYYY"),
       time_activity: time_activity,
+      store_id: store_id,
       post_activity_image: post_activity_image
         ? await saveImageToDisk(post_activity_image)
         : post_activity_image,
