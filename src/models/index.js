@@ -26,9 +26,10 @@ db.sequelize = sequelize;
 db.user = require("./user")(sequelize, Sequelize);
 db.post_activity = require("./post_activity")(sequelize, Sequelize);
 db.post_games = require("./post_games")(sequelize, Sequelize);
-db.comment = require("./comment")(sequelize, Sequelize);
+db.chat = require("./chat")(sequelize, Sequelize);
 db.participate = require("./participate")(sequelize, Sequelize);
 db.store = require("./store")(sequelize, Sequelize);
+db.notification = require("./notification")(sequelize, Sequelize);
 
 
 

@@ -3,9 +3,9 @@ const { generateRandomId } = require("../utils/generateRandomId"); // เรี�
 
 module.exports = (sequelize, Sequelize) => {
 
-const Comment = sequelize.define('comment', {
+const Chat = sequelize.define('chat', {
   // ระบุ attribute ของตาราง
-  comment_id: {
+  chat_id: {
     type: DataTypes.BIGINT,
     primaryKey: true,
     defaultValue: generateRandomId // ใช้ function generateRandomId เพื่อสร้างค่าเริ่มต้น
@@ -14,7 +14,7 @@ const Comment = sequelize.define('comment', {
     type: DataTypes.STRING(255),
     allowNull: false
   },
-  datetime_comment: {
+  datetime_chat: {
     type: DataTypes.STRING(20), // อาจจะเป็น DataTypes.DATE ถ้าคุณต้องการเก็บวันที่จริง
     allowNull: false
   },
@@ -42,11 +42,11 @@ const Comment = sequelize.define('comment', {
 
 // สร้างตารางตามโมเดลหากยังไม่มี
 sequelize.sync()
-  .then(() => console.log('Table `comment` has been created successfully.'))
+  .then(() => console.log('Table `chat` has been created successfully.'))
   .catch(error => console.error('This error occurred', error));
 
 
-return Comment;
+return Chat;
 
 };
 

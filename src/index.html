@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat App socket.io + express</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      * {
+        font-family: 'Noto Sans Thai', sans-serif;
+      }
+
+      .page-title {
+        text-align: center;
+        font-size: 2rem;
+      }
+
+      .chat-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        height: 100vh;
+        width: 640px;
+        margin: 0 auto;
+      }
+
+      .chat-messages {
+        flex: 1;
+        overflow-y: scroll;
+      }
+
+      .message {
+        background-color: #f1f0f0;
+        border-radius: 5px;
+        padding: 10px;
+        margin-bottom: 10px;
+      }
+
+      .message .meta {
+        font-size: 0.8rem;
+        color: #777;
+      }
+
+      .message .text {
+        font-size: 1rem;
+      }
+
+      .chat-form {
+        display: flex;
+        margin-top: 10px;
+      }
+
+      .chat-form #name {
+        padding: 0.5rem;
+        margin-right: 0.25rem;
+      }
+
+      .chat-form #message {
+        flex: 1;
+        padding: 0.5rem;
+        border-radius: 0.25rem;
+        border: 1px solid #4e4bfc;
+        margin-right: 0.5rem;
+      }
+
+      .chat-form button {
+        background-color: #4e4bfc;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        padding: 10px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="chat-container">
+      <h2 class="page-title">Notificatons</h2>
+      <div class="notify"></div>
+
+     
+
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script>
+      const socket = io()
+
+     
+
+   
+
+      socket.on('notifications_a7d3aae1-0b97-4db2-abfd-28aeacf7633f', (data) => {
+        console.log(data)
+        for (let i = 0; i < data.length; i++) {
+          const div = document.createElement('div')
+          div.classList.add('message')
+          div.innerHTML = `
+            <p class="meta">${data[i].type}</p>
+            <p class="text">${data[i].data.participant_status}</p>
+          `
+          document.querySelector('.notify').appendChild(div)
+         }
+       // document.querySelector('.chat-messages').appendChild(div)
+      })
+
+      function getName() {
+        // get name from date timestamp
+        const date = new Date()
+        return 'User-' + date.getTime()
+      }
+    </script>
+  </body>
+</html>
