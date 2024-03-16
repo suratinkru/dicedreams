@@ -13,6 +13,7 @@ exports.create = async (req, res, next) => {
       return;
     }
 
+
     // Create a game
     const chat = {
       message: req.body.message,
@@ -23,6 +24,61 @@ exports.create = async (req, res, next) => {
 
     // Save game in the database async
     const data = await Chat.create(chat);
+
+    
+     //select postgame by post_game_id
+     const postGame = await db.post_games.findByPk(req.body.post_games_id);
+         // insert table notification
+         const notification = {
+          type: "chat",
+          read: false,
+          time: new Date(),
+          user_id: postGame.dataValues.users_id,
+          entity_id: data.dataValues.chat_id,
+        };
+        await db.notification.create(notification);
+    
+        // ส่งข้อมูลกลับไปที่ client หลังจากทำการอัพเดท และสร้าง notification สำเร็จ socket.io จะทำการอัพเดทข้อมูลให้ทุกๆ client ที่เชื่อมต่อ แต่ละ client จะต้องเขียนโค้ดเพื่อรับข้อมูลที่ถูกส่งกลับมา
+        const messages = [];
+    
+        // get table notification by user_id where read = false
+        const notifications = await db.notification.findAll({
+          where: { user_id: postGame.dataValues.users_id, read: false },
+        });
+        for (let i = 0; i < notifications.length; i++) {
+          if (notifications[i].type === "participate") {
+            //  ดึงข้อมูลจาก table participate โดยใช้ entity_id ที่ได้จาก table notification
+            const participate = await db.participate.findByPk(
+              notifications[i].entity_id
+            );
+            messages.push({
+              type: "participate",
+              data: participate,
+              notification_id: notifications[i].notification_id,
+              entity_id: notifications[i].entity_id,
+              read: notifications[i].read,
+              time: notifications[i].time,
+            });
+          } else if (notifications[i].type === "chat") {
+            //  ดึงข้อมูลจาก table chat โดยใช้ entity_id ที่ได้จาก table notification
+            const chat = await db.chat.findByPk(notifications[i].entity_id);
+            messages.push({
+              type: "chat",
+              data: chat,
+              notification_id: notifications[i].notification_id,
+              entity_id: notifications[i].entity_id,
+              read: notifications[i].read,
+              time: notifications[i].time,
+            });
+          }
+        }
+    
+        // get socketio from app.js and emit to client
+    
+        req.app
+          .get("socketio")
+          .emit("notifications_" + postGame.dataValues.users_id, messages);
+
     res
       .status(201)
       .json({ message: "Game was created successfully.", data: data });
@@ -69,6 +125,61 @@ exports.update = async (req, res, next) => {
       where: { chat_id: id },
     });
     if (data == 1) {
+
+          // get in table chat by id
+          const chat = await Chat.findByPk(id);
+
+          // insert table notification
+          const notification = {
+            type: "chat",
+            read: false,
+            time: new Date(),
+            user_id: chat.dataValues.user_id,
+            entity_id: id,
+          };
+          await db.notification.create(notification);
+    
+          // ส่งข้อมูลกลับไปที่ client หลังจากทำการอัพเดท และสร้าง notification สำเร็จ socket.io จะทำการอัพเดทข้อมูลให้ทุกๆ client ที่เชื่อมต่อ แต่ละ client จะต้องเขียนโค้ดเพื่อรับข้อมูลที่ถูกส่งกลับมา
+          const messages = [];
+    
+          // get table notification by user_id where read = false
+          const notifications = await db.notification.findAll({
+            where: { user_id: chat.dataValues.user_id, read: false },
+          });
+          for (let i = 0; i < notifications.length; i++) {
+            if (notifications[i].type === "participate") {
+              //  ดึงข้อมูลจาก table participate โดยใช้ entity_id ที่ได้จาก table notification
+              const participate = await db.participate.findByPk(
+                notifications[i].entity_id
+              );
+              messages.push({
+                type: "participate",
+                data: participate,
+                notification_id: notifications[i].notification_id,
+                entity_id: notifications[i].entity_id,
+                read: notifications[i].read,
+                time: notifications[i].time,
+              });
+            } else if (notifications[i].type === "chat") {
+              //  ดึงข้อมูลจาก table chat โดยใช้ entity_id ที่ได้จาก table notification
+              const chat = await db.chat.findByPk(notifications[i].entity_id);
+              messages.push({
+                type: "chat",
+                data: chat,
+                notification_id: notifications[i].notification_id,
+                entity_id: notifications[i].entity_id,
+                read: notifications[i].read,
+                time: notifications[i].time,
+              });
+            }
+          }
+    
+          // get socketio from app.js and emit to client
+    
+          req.app
+            .get("socketio")
+            .emit("notifications_" + chat.dataValues.user_id, messages);
+
       res.status(200).json({
         message: "Game was updated successfully.",
       });

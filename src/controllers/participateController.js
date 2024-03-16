@@ -38,6 +38,62 @@ exports.create = async (req, res, next) => {
     // Save Participate in the database async
     const data = await Participate.create(participate);
 
+    //select postgame by post_game_id
+    const postGame = await db.post_games.findByPk(post_games_id);
+
+  
+    
+     // insert table notification
+     const notification = {
+      type: "participate",
+      read: false,
+      time: new Date(),
+      user_id: postGame.dataValues.users_id,
+      entity_id: data.dataValues.part_Id,
+    };
+    await db.notification.create(notification);
+
+    // ส่งข้อมูลกลับไปที่ client หลังจากทำการอัพเดท และสร้าง notification สำเร็จ socket.io จะทำการอัพเดทข้อมูลให้ทุกๆ client ที่เชื่อมต่อ แต่ละ client จะต้องเขียนโค้ดเพื่อรับข้อมูลที่ถูกส่งกลับมา
+    const messages = [];
+
+    // get table notification by user_id where read = false
+    const notifications = await db.notification.findAll({
+      where: { user_id: postGame.dataValues.users_id, read: false },
+    });
+    for (let i = 0; i < notifications.length; i++) {
+      if (notifications[i].type === "participate") {
+        //  ดึงข้อมูลจาก table participate โดยใช้ entity_id ที่ได้จาก table notification
+        const participate = await Participate.findByPk(
+          notifications[i].entity_id
+        );
+        messages.push({
+          type: "participate",
+          data: participate,
+          notification_id: notifications[i].notification_id,
+          entity_id: notifications[i].entity_id,
+          read: notifications[i].read,
+          time: notifications[i].time,
+        });
+      } else if (notifications[i].type === "chat") {
+        //  ดึงข้อมูลจาก table chat โดยใช้ entity_id ที่ได้จาก table notification
+        const chat = await db.chat.findByPk(notifications[i].entity_id);
+        messages.push({
+          type: "chat",
+          data: chat,
+          notification_id: notifications[i].notification_id,
+          entity_id: notifications[i].entity_id,
+          read: notifications[i].read,
+          time: notifications[i].time,
+        });
+      }
+    }
+
+    // get socketio from app.js and emit to client
+
+    req.app
+      .get("socketio")
+      .emit("notifications_" + postGame.dataValues.users_id, messages);
+
     res
       .status(201)
       .json({ message: "Participate was created successfully.", data: data });
